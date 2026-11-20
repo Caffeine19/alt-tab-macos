@@ -36,6 +36,16 @@ class CGSCallScheduler {
         return rawWindowSpaces(wid)
     }
 
+    static func hasProjectedWindowBounds(_ wid: CGWindowID) -> Bool {
+        dispatchPrecondition(condition: .notOnQueue(.main))
+        guard let windows = CGWindowListCopyWindowInfo(.optionIncludingWindow, wid) as? [[CFString: Any]],
+              let bounds = windows.first?[kCGWindowBounds] as? [String: Any],
+              let visual = CGRect(dictionaryRepresentation: bounds as CFDictionary) else { return false }
+        var logical = CGRect.zero
+        guard SLSGetWindowBounds(CGS_CONNECTION, wid, &logical) == .success else { return false }
+        return WindowCaptureGeometry.isProjected(visual.size, relativeTo: logical.size)
+    }
+
     /// Which of `wids` still exist (CGWindowListCreateDescriptionFromArray — a targeted lookup of exactly
     /// these wids, NOT a Space-scoped enumeration, so it can't false-negative on other-Space windows). `nil`
     /// = the query failed, so the caller must treat existence as unknown and NOT discard. Fetched off-main.

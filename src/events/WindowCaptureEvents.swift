@@ -11,6 +11,11 @@ class WindowCaptureScreenshots {
     private static let maxPendingShareableCaptures = 256
     private static var shareableCaptures = CaptureDiscovery<PendingCapture>(capacity: maxPendingShareableCaptures)
     private static let discoveryTimeoutSeconds = 5.0
+    private static let stageManagerDefaults = UserDefaults(suiteName: "com.apple.WindowManager")
+    private static var shouldCheckStageManagerBounds: Bool {
+        guard #available(macOS 27.0, *) else { return false }
+        return stageManagerDefaults?.bool(forKey: "GloballyEnabled") == true
+    }
     #if DEBUG
     private static var dropNextDiscovery = false
 
@@ -186,6 +191,11 @@ class WindowCaptureScreenshots {
         // [weak window] avoids keeping a closed Window alive while the capture is queued or in-flight with the OS
         Applications.screenshotThrottler.throttleOrProceed(key: "\(keyPrefix)-wid-\(scWindow.windowID)", queue: BackgroundWork.screenshotsQueue, priority: isPrioritized ? .high : .normal) { [weak window = request.window] in
             guard !App.isTerminating, !ScreenLockEvents.isScreenLocked, let window else { return }
+            let wid = scWindow.windowID
+            if shouldCheckStageManagerBounds, CGSCallScheduler.hasProjectedWindowBounds(wid) {
+                Logger.debug { "wid:\(wid) skipped projected window capture" }
+                return
+            }
             let config = SCStreamConfiguration.forWindow(size, scaleFactor, request.fullRes)
             let filter = SCContentFilter(desktopIndependentWindow: scWindow)
             // Through the gate, not merely counted: these APIs are ASYNCHRONOUS, so the `screenshotsQueue`
@@ -203,16 +213,16 @@ class WindowCaptureScreenshots {
                 // that one case stays on captureSampleBuffer. Its CGImage copy (vs a shared IOSurface) is acceptable
                 // even at full resolution now that Preview frames are fetched lazily, a few per session (#5861).
                 if #available(macOS 26.0, *), !request.isFullscreen {
-                    captureScreenshot(filter, config, window, source, request.fullRes, finish)
+                    captureScreenshot(filter, config, wid, window, source, request.fullRes, finish)
                 } else {
-                    captureSampleBuffer(filter, config, window, source, request.fullRes, finish)
+                    captureSampleBuffer(filter, config, wid, window, source, request.fullRes, finish)
                 }
             }
         }
     }
 
     @available(macOS 26.0, *)
-    private static func captureScreenshot(_ filter: SCContentFilter, _ streamConfig: SCStreamConfiguration, _ window: Window, _ source: RefreshCausedBy, _ fullRes: Bool, _ finish: @escaping () -> Void) {
+    private static func captureScreenshot(_ filter: SCContentFilter, _ streamConfig: SCStreamConfiguration, _ wid: CGWindowID, _ window: Window, _ source: RefreshCausedBy, _ fullRes: Bool, _ finish: @escaping () -> Void) {
         let config = SCScreenshotConfiguration()
         config.width = streamConfig.width
         config.height = streamConfig.height
@@ -225,22 +235,37 @@ class WindowCaptureScreenshots {
             // fullscreen transition, and the next refresh re-routes it. Retrying here would silently reintroduce
             // the stream churn this path exists to avoid, and would hide new failure modes from the logs.
             guard let cgImage = output?.sdrImage, error == nil else { Logger.error { "\(window.debugId) \(output == nil) \(error)" }; return }
-            deliver(window, source, .cgImage(cgImage), fullRes)
+            deliver(wid, window, source, .cgImage(cgImage), fullRes)
         }
     }
 
-    private static func captureSampleBuffer(_ filter: SCContentFilter, _ config: SCStreamConfiguration, _ window: Window, _ source: RefreshCausedBy, _ fullRes: Bool, _ finish: @escaping () -> Void) {
+    private static func captureSampleBuffer(_ filter: SCContentFilter, _ config: SCStreamConfiguration, _ wid: CGWindowID, _ window: Window, _ source: RefreshCausedBy, _ fullRes: Bool, _ finish: @escaping () -> Void) {
         SCScreenshotManager.captureSampleBuffer(contentFilter: filter, configuration: config) { [weak window] sampleBuffer, error in
             finish()
             guard let window else { return }
             guard let sampleBuffer, error == nil else { Logger.error { "\(window.debugId) \(sampleBuffer == nil) \(error)" }; return }
             guard let pixelBuffer = sampleBuffer.pixelBuffer() ?? sampleBuffer.imageBuffer else { Logger.error { "\(window.debugId) no pixelBuffer" }; return }
-            deliver(window, source, .pixelBuffer(pixelBuffer), fullRes)
+            deliver(wid, window, source, .pixelBuffer(pixelBuffer), fullRes)
         }
     }
 
-    private static func deliver(_ window: Window, _ source: RefreshCausedBy, _ contents: CALayerContents, _ fullRes: Bool) {
+    private static func deliver(_ wid: CGWindowID, _ window: Window, _ source: RefreshCausedBy, _ contents: CALayerContents, _ fullRes: Bool) {
         guard source != .refreshOnlyThumbnailsAfterShowUi || SwitcherSession.isActive else { return }
+        guard shouldCheckStageManagerBounds else {
+            deliverOnMain(window, source, contents, fullRes)
+            return
+        }
+        BackgroundWork.screenshotsQueue.addOperation { [weak window] in
+            guard let window, source != .refreshOnlyThumbnailsAfterShowUi || SwitcherSession.isActive else { return }
+            guard !CGSCallScheduler.hasProjectedWindowBounds(wid) else {
+                Logger.debug { "wid:\(wid) discarded projected window capture" }
+                return
+            }
+            deliverOnMain(window, source, contents, fullRes)
+        }
+    }
+
+    private static func deliverOnMain(_ window: Window, _ source: RefreshCausedBy, _ contents: CALayerContents, _ fullRes: Bool) {
         DispatchQueue.main.async { [weak window] in
             guard let window, source != .refreshOnlyThumbnailsAfterShowUi || SwitcherSession.isActive else { return }
             if fullRes {

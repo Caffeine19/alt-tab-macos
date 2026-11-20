@@ -451,6 +451,9 @@
 		5CC019000000000000000101 /* CaptureDiscovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CC019000000000000000100 /* CaptureDiscovery.swift */; };
 		5CC019000000000000000102 /* CaptureDiscovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CC019000000000000000100 /* CaptureDiscovery.swift */; };
 		5CC019000000000000000202 /* CaptureDiscoveryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CC019000000000000000200 /* CaptureDiscoveryTests.swift */; };
+		5CC019000000000000000301 /* WindowCaptureGeometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CC019000000000000000300 /* WindowCaptureGeometry.swift */; };
+		5CC019000000000000000302 /* WindowCaptureGeometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CC019000000000000000300 /* WindowCaptureGeometry.swift */; };
+		5CC019000000000000000402 /* WindowCaptureGeometryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CC019000000000000000400 /* WindowCaptureGeometryTests.swift */; };
 		254094A701BAF49F701F7EFF /* SearchDiscoveryPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D658C9879802E65C83FB7C4 /* SearchDiscoveryPolicy.swift */; };
 		389D13E4E7FFA467D5BC68D8 /* SearchDiscoveryPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D658C9879802E65C83FB7C4 /* SearchDiscoveryPolicy.swift */; };
 		E7DC5BA37EF80DD2802D96BD /* SearchDiscoveryPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9B4EAFB2DB4884AB83CC9BA /* SearchDiscoveryPanel.swift */; };
@@ -918,6 +921,8 @@
 		6A7E5D000000000000000200 /* StapledTicketTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StapledTicketTests.swift; sourceTree = "<group>"; };
 		5CC019000000000000000100 /* CaptureDiscovery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureDiscovery.swift; sourceTree = "<group>"; };
 		5CC019000000000000000200 /* CaptureDiscoveryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureDiscoveryTests.swift; sourceTree = "<group>"; };
+		5CC019000000000000000300 /* WindowCaptureGeometry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowCaptureGeometry.swift; sourceTree = "<group>"; };
+		5CC019000000000000000400 /* WindowCaptureGeometryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowCaptureGeometryTests.swift; sourceTree = "<group>"; };
 		9D658C9879802E65C83FB7C4 /* SearchDiscoveryPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchDiscoveryPolicy.swift; sourceTree = "<group>"; };
 		F9B4EAFB2DB4884AB83CC9BA /* SearchDiscoveryPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchDiscoveryPanel.swift; sourceTree = "<group>"; };
 		C158A0994BBFCB51D55E9FD3 /* SearchDiscoveryHint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchDiscoveryHint.swift; sourceTree = "<group>"; };
@@ -1053,6 +1058,8 @@
 				5F04852D2F09AC9700235D4A /* WindowCaptureEvents.swift */,
 				5CC019000000000000000200 /* CaptureDiscoveryTests.swift */,
 				5CC019000000000000000100 /* CaptureDiscovery.swift */,
+				5CC019000000000000000300 /* WindowCaptureGeometry.swift */,
+				5CC019000000000000000400 /* WindowCaptureGeometryTests.swift */,
 				D04BA4A621A8A15660F973C1 /* KeyboardEvents.swift */,
 				BF0C8643F524515224BF1618 /* KeyboardEventsTestable.swift */,
 				BF0C8A11E7C34D2190AB4401 /* ModifierReleaseLog.swift */,
@@ -2197,6 +2204,8 @@
 				6A7E5D000000000000000202 /* StapledTicketTests.swift in Sources */,
 				5CC019000000000000000102 /* CaptureDiscovery.swift in Sources */,
 				5CC019000000000000000202 /* CaptureDiscoveryTests.swift in Sources */,
+				5CC019000000000000000302 /* WindowCaptureGeometry.swift in Sources */,
+				5CC019000000000000000402 /* WindowCaptureGeometryTests.swift in Sources */,
 				5EA8E110000000000000F203 /* SchedulingPolicy.swift in Sources */,
 				5EA8E110000000000000F212 /* SchedulingPolicyTests.swift in Sources */,
 				5EA8E110000000000000DA03 /* DragAndDropResolver.swift in Sources */,
@@ -2521,6 +2530,7 @@
 				5CC018000000000000000101 /* CoalescedWork.swift in Sources */,
 				6A7E5D000000000000000101 /* StapledTicket.swift in Sources */,
 				5CC019000000000000000101 /* CaptureDiscovery.swift in Sources */,
+				5CC019000000000000000301 /* WindowCaptureGeometry.swift in Sources */,
 				5EA8E110000000000000F202 /* SchedulingPolicy.swift in Sources */,
 				AA0C8A100000000000000001 /* AXCallScheduler.swift in Sources */,
 				AA0C8A1000000000000000B1 /* CGSCallScheduler.swift in Sources */,

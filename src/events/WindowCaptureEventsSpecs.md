@@ -48,6 +48,13 @@ Fullscreen windows use `captureSampleBuffer` because the screenshot API fails wh
 
 ## Edge cases
 
+- **Stage Manager on macOS 27**: ScreenCaptureKit can return the projected card at the requested
+  pixel dimensions. The WindowServer reports the card dimensions through `kCGWindowBounds` and the
+  original window dimensions through `SLSGetWindowBounds`. Compare them off-main before requesting
+  a capture and again before updating either cache, since the window can move to the strip while the
+  capture is queued. A rejected capture keeps the previous thumbnail or the app icon if none exists.
+  The next normal refresh can replace it when the window is focused or Stage Manager is toggled.
+
 - **Lost discovery callback**: unit tests cover timeout recovery, late-callback rejection, late-watchdog
   rejection, and progress of requests arriving during a lost call. Live QA `CP-03` drops one real discovery
   callback through a debug-only hook, then checks that a new window gets its capture on a later summon

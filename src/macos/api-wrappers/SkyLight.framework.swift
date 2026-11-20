@@ -24,6 +24,11 @@ struct CGSWindowCaptureOptions: OptionSet {
 @_silgen_name("CGSMainConnectionID")
 func CGSMainConnectionID() -> CGSConnectionID
 
+/// Returns the untransformed window frame. On macOS 27, `kCGWindowBounds` describes the projected
+/// Stage Manager card while this call still returns the original window's bounds.
+@_silgen_name("SLSGetWindowBounds")
+func SLSGetWindowBounds(_ cid: CGSConnectionID, _ wid: CGWindowID, _ bounds: inout CGRect) -> CGError
+
 /// returns an array of CGImage of the windows which ID is given as `windowList`. `windowList` is supposed to be an array of IDs but in my test on High Sierra, the function ignores other IDs than the first, and always returns the screenshot of the first window in the array
 /// * performance: the `HW` in the name seems to imply better performance, and it was observed by some contributors that it seems to be faster (see https://github.com/lwouis/alt-tab-macos/issues/45) than other methods
 /// * quality: medium
